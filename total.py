@@ -17,8 +17,8 @@ import time
 st.set_page_config(page_title="스마트 쇼핑 파인더", layout="wide")
 
 # 네이버 API 클라이언트 ID와 시크릿
-NAVER_CLIENT_ID = "5S1NwPfXs4UKgAE9rmZa"
-NAVER_CLIENT_SECRET = "gIPg2ZCwpH"
+NAVER_CLIENT_ID = st.secrets["NAVER_CLIENT_ID"]
+NAVER_CLIENT_SECRET = st.secrets["NAVER_CLIENT_SECRET"]
 
 # Streamlit에서 실행 중인지 확인하고 secrets 가져오기
 try:
@@ -483,23 +483,6 @@ def get_user_prompt(query, context_text, source_type):
 
 답변 작성 규칙:
 1. 한국어로 자연스럽게 답변해주세요.
-2. 블로그 글은 개인의 경험과 의견을 담고 있으므로, 정보의 주관성을 고려해주세요.
-3. 여러 블로그의 공통된 내용에 중점을 두고, 개인적 경험이나 팁은 "블로거의 경험에 따르면..."과 같이 맥락을 제공해주세요.
-4. 블로그 글들 간에 상충되는 정보가 있다면 "일부 블로거는 A를 추천하는 반면, 다른 블로거는 B를 선호합니다"와 같이 다양한 의견을 제시해주세요.
-5. 레시피, DIY 방법, 여행 경험 등 실용적인 정보에 집중해주세요.
-6. 출처를 명시할 때는 "문서 2의 블로거에 따르면..."과 같이 표현해주세요.
-7. 제공된 문서 내용만 사용하고, 문서에 없는 내용은 추측하거나 답변하지 마세요."""
-
-    elif source_type == "뉴스":
-        return f"""다음은 네이버 뉴스에서 수집한, 신뢰할 수 있는 언론사의 기사입니다:
-
-{context_text}
-
-위 뉴스 기사들을 바탕으로 다음 질문에 상세히 답변해주세요: 
-"{query}"
-
-답변 작성 규칙:
-1. 한국어로 자연스럽게 답변해주세요.
 2. 뉴스 기사의 사실과 정보를 전달할 때는 편향되지 않게 중립적인 입장을 유지하세요.
 3. 기사의 발행 날짜를 고려하여 정보의 시의성을 명시하세요. (예: "2023년 5월 보도에 따르면...")
 4. 여러 언론사의 기사를 인용할 때는 "문서 1의 OO일보에 따르면..."와 같이 출처를 명확히 하세요.
@@ -620,14 +603,14 @@ search_mode = st.sidebar.radio(
 # --- 검색 소스 및 질문 입력 로직 ---
 source_options = ["쇼핑", "블로그", "뉴스"] # 검색 소스 순서 변경: 쇼핑이 맨 앞
 samsung_laptop_questions = [
-    "그릭요거트 추천해주세요.",
-    "그릭요거트 가격을 비교해주세요.",
-    "그릭요거트 중 인기가 많은 상품을 알려주세요."
+    "삼성 노트북 최신 모델 추천해주세요.",
+    "삼성 노트북 갤럭시 북 시리즈 비교해주세요.",
+    "삼성 노트북 가성비 좋은 모델은 무엇인가요?"
 ]
 default_queries_map = {
     "쇼핑": samsung_laptop_questions[0], # 쇼핑 탭 기본 질문
-    "블로그": "그릭요거트를 맛있게 먹는 방법은 뭐지?",
-    "뉴스": "그릭요거트에 대한 최신 뉴스 기사를 추출해주세요."
+    "블로그": "안성탕면 맛있게 끓이는 방법이 뭐지?",
+    "뉴스": "최근 경제 이슈는 무엇인가요?"
 }
 
 # 세션 상태 초기화 (앱 로드 시 한 번만 실행되도록)
@@ -643,7 +626,25 @@ def source_type_on_change():
     new_source_type = st.session_state.source_type_radio_key 
     st.session_state.current_source_type = new_source_type
     st.session_state.query_input = default_queries_map[new_source_type]
-    # 콜사)"
+    # 콜백 내에서 st.rerun()은 Streamlit이 자동으로 처리하므로 명시적으로 호출할 필요 없음
+
+# 검색 소스 선택 라디오 버튼
+selected_source_from_radio = st.radio(
+    "검색 소스 선택",
+    options=source_options,
+    index=source_options.index(st.session_state.current_source_type), # 현재 세션 상태의 인덱스 사용
+    horizontal=True,
+    key="source_type_radio_key", # on_change 콜백에서 이 키를 통해 값을 참조
+    on_change=source_type_on_change
+)
+# selected_source_from_radio는 현재 UI의 값. 실제 관리되는 상태는 st.session_state.current_source_type
+active_source_type = st.session_state.current_source_type
+
+# 검색 입력 필드 도움말 텍스트
+help_texts = {
+    "쇼핑": "삼성 노트북 추천 질문을 클릭하거나 직접 검색어를 입력하세요.",
+    "블로그": "블로그 관련 검색어를 입력하세요. (예: 안성탕면 레시피)",
+    "뉴스": "뉴스 관련 검색어를 입력하세요. (예: 최신 경제 동향)"
 }
 current_help_text = help_texts[active_source_type]
 
@@ -661,7 +662,7 @@ if user_typed_query != st.session_state.query_input:
 
 # "쇼핑" 탭일 때 삼성 노트북 추천 질문 버튼 표시
 if active_source_type == "쇼핑":
-    st.markdown("👇 **그릭요거트 관련 추천 질문을 선택해보세요!**")
+    st.markdown("👇 **삼성 노트북 관련 추천 질문을 선택해보세요!**")
     cols = st.columns(len(samsung_laptop_questions))
     for i, q_text in enumerate(samsung_laptop_questions):
         if cols[i].button(q_text, key=f"samsung_q_btn_{i}"):
