@@ -603,14 +603,14 @@ search_mode = st.sidebar.radio(
 # --- 검색 소스 및 질문 입력 로직 ---
 source_options = ["쇼핑", "블로그", "뉴스"] # 검색 소스 순서 변경: 쇼핑이 맨 앞
 samsung_laptop_questions = [
-    "삼성 노트북 최신 모델 추천해주세요.",
-    "삼성 노트북 갤럭시 북 시리즈 비교해주세요.",
-    "삼성 노트북 가성비 좋은 모델은 무엇인가요?"
+    "그릭요거트 추천해주세요.",
+    "그릭요거트 가격을 비교해주세요.",
+    "그릭요거트 인기 상품은 무엇인가요?"
 ]
 default_queries_map = {
     "쇼핑": samsung_laptop_questions[0], # 쇼핑 탭 기본 질문
-    "블로그": "안성탕면 맛있게 끓이는 방법이 뭐지?",
-    "뉴스": "최근 경제 이슈는 무엇인가요?"
+    "블로그": "그릭요거트 맛있게 끓이는 방법이 뭐지?",
+    "뉴스": "그릭요거트 최신 기사는 무엇인가요?"
 }
 
 # 세션 상태 초기화 (앱 로드 시 한 번만 실행되도록)
@@ -642,9 +642,9 @@ active_source_type = st.session_state.current_source_type
 
 # 검색 입력 필드 도움말 텍스트
 help_texts = {
-    "쇼핑": "삼성 노트북 추천 질문을 클릭하거나 직접 검색어를 입력하세요.",
-    "블로그": "블로그 관련 검색어를 입력하세요. (예: 안성탕면 레시피)",
-    "뉴스": "뉴스 관련 검색어를 입력하세요. (예: 최신 경제 동향)"
+    "쇼핑": "그릭요거트 추천 질문을 클릭하거나 직접 검색어를 입력하세요.",
+    "블로그": "블로그 관련 검색어를 입력하세요. (예: 그릭요거트 추천)",
+    "뉴스": "뉴스 관련 검색어를 입력하세요. (예: 최신 뉴스 기사)"
 }
 current_help_text = help_texts[active_source_type]
 
@@ -662,7 +662,7 @@ if user_typed_query != st.session_state.query_input:
 
 # "쇼핑" 탭일 때 삼성 노트북 추천 질문 버튼 표시
 if active_source_type == "쇼핑":
-    st.markdown("👇 **삼성 노트북 관련 추천 질문을 선택해보세요!**")
+    st.markdown("👇 **그릭요거트 관련 추천 질문을 선택해보세요!**")
     cols = st.columns(len(samsung_laptop_questions))
     for i, q_text in enumerate(samsung_laptop_questions):
         if cols[i].button(q_text, key=f"samsung_q_btn_{i}"):
@@ -870,7 +870,7 @@ st.sidebar.info(f"""
 
 💡 **개선 사항:**
 - 쇼핑 정보 검색에 최적화
-- 삼성 노트북 관련 추천 질문 제공 (쇼핑 탭)
+- 그릭요거트 관련 추천 질문 제공 (쇼핑 탭)
 - 뉴스 데이터 저장 형식 개선
 - 뉴스 전용 낮은 유사도 임계값 적용
 - 언론사 정보 추출 로직 개선
